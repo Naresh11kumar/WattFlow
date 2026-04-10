@@ -148,7 +148,7 @@ function localOptimize(readings, strategy="balanced") {
 
 // ─── API CLIENT ───────────────────────────────────────────────────────────────
 async function apiFetch(path, opts={}) {
-  const res = await fetch(`${API_URL}${path}`),{headers:{"Content-Type":"application/json"},...opts});
+  const res = await fetch(`${API}${path}`,{headers:{"Content-Type":"application/json"},...opts});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.detail||`HTTP ${res.status}`);}
   return res.json();
 }
@@ -223,29 +223,23 @@ export default function WattFlow() {
   const [optimizedData, setOptimizedData] = useState(null);
   const [shiftedEnergy, setShiftedEnergy] = useState(0);
   const runOptimization = async () => {
-  try {
-    const res = await fetch(`${API_URL}/simulate`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        solar: 120,
-        demand: 200,
-      }),
-    });
-    <button onClick={runOptimization}>
+  const res = await fetch("http://127.0.0.1:8000/simulate", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      solar: 120,
+      demand: 200,
+    }),
+  });
+
+  const data = await res.json();
+  console.log(data);
+};
+<button onClick={runOptimization}>
   Run AI Optimization
 </button>
-
-    const data = await res.json();
-    console.log(data);
-    setOptimizedData(data);
-  } catch (err) {
-    console.error(err);
-  }
-};
-
   // your existing states + UI below
   const [online,   setOnline]    = useState(false);
   const [sim,      setSim]       = useState(null);      // raw simulation
